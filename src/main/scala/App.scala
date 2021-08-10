@@ -13,7 +13,7 @@ object App {
   def main(args: Array[String]): Unit = {
     // create a spark session
     // for Windows
-    System.setProperty("hadoop.home.dir", "C:\\winutils")
+    //System.setProperty("hadoop.home.dir", "C:\\winutils")
 
     spark = spark_session_init()
     sc = spark.sparkContext
