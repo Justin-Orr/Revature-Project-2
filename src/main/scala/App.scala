@@ -19,7 +19,7 @@ object App {
   def spark_session_init(): SparkSession = {
     return SparkSession
       .builder
-      .appName("hello hive")
+      .appName("Hello Hive...")
       .config("spark.master", "local")
       .enableHiveSupport()
       .getOrCreate()
