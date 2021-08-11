@@ -37,9 +37,19 @@ object Justin {
   def getTotalConfirmationsBySeason(spark:SparkSession): Unit = {
     //Create data frames based on all columns within a range based of the column headers of the table
 
-    //Winter Dates 2020
     val winter_sum_df = get_seasonal_confirmations(spark,4,42,"winter")
+    val spring_sum_df = get_seasonal_confirmations(spark,43,134,"spring")
+    val summer_sum_df = get_seasonal_confirmations(spark,135,226,"summer")
+    val fall_sum_df = get_seasonal_confirmations(spark,227,317,"fall")
+    val winter_sum_df2 = get_seasonal_confirmations(spark,318,407,"winter_2")
+    val spring_sum_df2 = get_seasonal_confirmations(spark,408,470,"spring_2")
+
     winter_sum_df.show(10)
+    spring_sum_df.show(10)
+    summer_sum_df.show(10)
+    fall_sum_df.show(10)
+    winter_sum_df2.show(10)
+    spring_sum_df2.show(10)
 
   }
 
