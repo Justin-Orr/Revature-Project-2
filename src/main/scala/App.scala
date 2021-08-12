@@ -1,4 +1,7 @@
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.dsl.expressions.StringToAttributeConversionHelper
+import org.apache.spark.sql.functions.{avg, col}
+
 
 object App {
 
@@ -13,6 +16,9 @@ object App {
     println("-- Created Spark Session --")
     spark.sparkContext.setLogLevel("ERROR")
     spark_test()
+
+
+    Devin.showMortalityRates
 
   }
 
@@ -30,5 +36,6 @@ object App {
     spark.sql("LOAD DATA LOCAL INPATH 'input/test.txt' INTO TABLE newone")
     spark.sql("SELECT * FROM newone").show()
     spark.sql("DROP table newone")
+
   }
 }
