@@ -1,6 +1,8 @@
 import App.{sc, spark}
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, lit, monotonically_increasing_id, row_number}
+import Array._
 
 
 object Justin {
@@ -12,10 +14,14 @@ object Justin {
   var deaths_US_df:DataFrame = null
   var recovered_df:DataFrame = null
 
+  /* Main function to be used */
+
   def findings(spark:SparkSession):Unit = {
     create_data_frames()
     getTotalConfirmationsBySeason(spark)
   }
+
+  /* General Helper Functions */
 
   def import_data(fileName: String):DataFrame = {
     return spark.read.format("csv")
@@ -27,12 +33,26 @@ object Justin {
 
   def create_data_frames(): Unit = {
     //c19_df = import_data("covid_19_data.csv")
+
     confirmed_df = import_data("time_series_covid_19_confirmed.csv")
+    confirmed_df = add_row_numbers(confirmed_df)
+    confirmed_df.show()
+
     //confirmed_US_df = import_data("time_series_covid_19_confirmed_US.csv")
     //deaths_df = import_data("time_series_covid_19_deaths.csv")
     //deaths_US_df = import_data("time_series_covid_19_deaths_US.csv")
     //recovered_df = import_data("time_series_covid_19_recovered.csv")
   }
+
+  def add_row_numbers(df:DataFrame): DataFrame = {
+    val windSpec = Window.partitionBy(lit(0))
+      .orderBy(monotonically_increasing_id())
+    return df.withColumn("row_num", row_number().over(windSpec))
+  }
+
+
+  /* Use case Functions */
+
 
   def getTotalConfirmationsBySeason(spark:SparkSession): Unit = {
     //Create data frames based on all columns within a range based of the column headers of the table
@@ -74,7 +94,9 @@ object Justin {
     }
 
     import spark.implicits._
-    return sc.parallelize(confirmed_season_array_row).toDF(season + "_total_confirmed")
+    var df = sc.parallelize(confirmed_season_array_row).toDF(season + "_total_confirmed")
+    df = add_row_numbers(df)
+    return df
   }
 
 }
