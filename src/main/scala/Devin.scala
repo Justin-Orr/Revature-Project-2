@@ -57,7 +57,7 @@ object Devin {
     import spark.implicits._
 
     val first_confirmed_cases = USFirstConfirmedDataFrame().union(internationalFirstConfirmedDataFrame())
-      .groupBy($"Province/State", $"Country/Region")
+      .groupBy( $"Country/Region")
       .agg(min($"First_Confirmed_Case"))
 
     first_confirmed_cases.createOrReplaceTempView("first_confirmed_cases")
@@ -68,11 +68,11 @@ object Devin {
 
     covid_19_data.createOrReplaceTempView("covid_19_data")
 
-    val regional_aggregates = spark.sql("SELECT `Province/State`, `Country/Region`, row_number() OVER (ORDER BY SUM(deaths)/sum(Confirmed) DESC) as rank, ROUND(sum(deaths)/sum(Confirmed)*100,3) as death_rate, sum(Confirmed) as confirmed_cases" +
-      " FROM covid_19_data GROUP BY `Province/State`, `Country/Region` ORDER BY rank ASC")
+    val regional_aggregates = spark.sql("SELECT `Country/Region`, row_number() OVER (ORDER BY SUM(deaths)/sum(Confirmed) DESC) as rank, ROUND(sum(deaths)/sum(Confirmed)*100,3) as death_rate, sum(Confirmed) as confirmed_cases" +
+      " FROM covid_19_data GROUP BY `Country/Region` ORDER BY rank ASC")
 
-    regional_aggregates.join(first_confirmed_cases, Seq("Province/State", "Country/Region"), "inner")
-      .orderBy("rank").show
+    regional_aggregates.join(first_confirmed_cases, Seq( "Country/Region"), "inner")
+      .orderBy("rank").withColumnRenamed("min(First_Confirmed_Case", "First_Confirmed_Case").show
 
 
     // convert results to RDD and persist
