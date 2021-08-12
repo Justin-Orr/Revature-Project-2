@@ -36,7 +36,6 @@ object Justin {
 
     confirmed_df = import_data("time_series_covid_19_confirmed.csv")
     confirmed_df = add_row_numbers(confirmed_df)
-    confirmed_df.show()
 
     //confirmed_US_df = import_data("time_series_covid_19_confirmed_US.csv")
     //deaths_df = import_data("time_series_covid_19_deaths.csv")
@@ -57,19 +56,60 @@ object Justin {
   def getTotalConfirmationsBySeason(spark:SparkSession): Unit = {
     //Create data frames based on all columns within a range based of the column headers of the table
 
-    val winter_sum_df = get_seasonal_confirmations(spark,4,42,"winter")
-    val spring_sum_df = get_seasonal_confirmations(spark,43,134,"spring")
-    val summer_sum_df = get_seasonal_confirmations(spark,135,226,"summer")
-    val fall_sum_df = get_seasonal_confirmations(spark,227,317,"fall")
-    val winter_sum_df2 = get_seasonal_confirmations(spark,318,407,"winter_2")
-    val spring_sum_df2 = get_seasonal_confirmations(spark,408,470,"spring_2")
+    val winter_sum_df = get_seasonal_confirmations(spark,4,42,"winter_19_20")
+    val spring_sum_df = get_seasonal_confirmations(spark,43,134,"spring_20")
+    val summer_sum_df = get_seasonal_confirmations(spark,135,226,"summer_20")
+    val fall_sum_df = get_seasonal_confirmations(spark,227,317,"fall_20")
+    val winter_sum_df2 = get_seasonal_confirmations(spark,318,407,"winter_20_21")
+    val spring_sum_df2 = get_seasonal_confirmations(spark,408,470,"spring_21")
 
-    winter_sum_df.show(10)
-    spring_sum_df.show(10)
-    summer_sum_df.show(10)
-    fall_sum_df.show(10)
-    winter_sum_df2.show(10)
-    spring_sum_df2.show(10)
+    var colNum = Seq(0,1,2,3,471) //inclusive
+    val confirmed_short_df = confirmed_df.select(colNum map confirmed_df.columns map col: _*)
+
+    confirmed_short_df.createOrReplaceTempView("confirmed_short_df")
+    winter_sum_df.createOrReplaceTempView("winter_sum_df")
+    spring_sum_df.createOrReplaceTempView("spring_sum_df")
+    summer_sum_df.createOrReplaceTempView("summer_sum_df")
+    fall_sum_df.createOrReplaceTempView("fall_sum_df")
+    winter_sum_df2.createOrReplaceTempView("winter_sum_df2")
+    spring_sum_df2.createOrReplaceTempView("spring_sum_df2")
+
+    val q1 = "SELECT w.row_num, winter_19_20_total_confirmed, spring_20_total_confirmed FROM " +
+          "winter_sum_df w INNER JOIN spring_sum_df s " +
+          "ON w.row_num = s.row_num " +
+          "ORDER BY row_num"
+
+    val q2 = "SELECT s.row_num, summer_20_total_confirmed, fall_20_total_confirmed FROM " +
+          "summer_sum_df s INNER JOIN fall_sum_df f " +
+          "ON s.row_num = f.row_num " +
+          "ORDER BY row_num"
+
+    val q3 = "SELECT w.row_num, winter_20_21_total_confirmed, spring_21_total_confirmed FROM " +
+          "winter_sum_df2 w INNER JOIN spring_sum_df2 s " +
+          "ON w.row_num = s.row_num " +
+          "ORDER BY row_num"
+
+    val q4 = "SELECT t1.row_num, winter_19_20_total_confirmed, spring_20_total_confirmed, summer_20_total_confirmed, fall_20_total_confirmed " +
+      "FROM ("+ q1 + ") t1 INNER JOIN (" + q2 + ") t2 " +
+      "ON t1.row_num = t2.row_num " +
+      "ORDER BY row_num"
+
+    val q5 = "SELECT t3.row_num, winter_19_20_total_confirmed, spring_20_total_confirmed, summer_20_total_confirmed, fall_20_total_confirmed, winter_20_21_total_confirmed, spring_21_total_confirmed " +
+      "FROM ("+ q3 + ") t3 INNER JOIN (" + q4 + ") t4 " +
+      "ON t3.row_num = t4.row_num " +
+      "ORDER BY row_num"
+
+    spark.sql("SELECT c.row_num, `Province/State`, `Country/Region`, Lat, Long, " +
+      "winter_19_20_total_confirmed, " +
+      "spring_20_total_confirmed, " +
+      "summer_20_total_confirmed, " +
+      "fall_20_total_confirmed, " +
+      "winter_20_21_total_confirmed, " +
+      "spring_21_total_confirmed " +
+      "FROM confirmed_short_df c " +
+      "INNER JOIN (" + q5 + ") t5 " +
+      "ON c.row_num = t5.row_num " +
+      "ORDER BY row_num").show()
 
   }
 
