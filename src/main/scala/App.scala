@@ -57,7 +57,9 @@ object App {
     spark.sql("select `Country/Region`,sum(Confirmed) as Confirmed,sum(Deaths) as Deaths from tb_covid_19_data group by `Country/Region`")createOrReplaceTempView("tb_5")
     spark.sql("select * from tb_5").show()
     spark.sql("SELECT tb_5.`Country/Region`,tb_confirmed.Lat,`Confirmed`,`Deaths` from tb_5 right join tb_confirmed on tb_5.`Country/Region` = tb_confirmed.`Country/Region` order by Lat asc")createOrReplaceTempView("tb_6")
-    spark.sql("select `Country/Region`, lat, confirmed, deaths")
+    spark.sql("select `Country/Region`, lat, confirmed, deaths, case when (Lat >= 0 and Lat <= 30) then '0 to 30' when (Lat > 30 and Lat <= 60) then '30 to 60' when (Lat > 60 and Lat <= 90) then '60 to 90' when (Lat < 0 and Lat >= -30) then '-30 to 0' when (Lat < -30 and Lat >= -60) then '-60 to -30' when (Lat < -60 and Lat >= -90) then '-90 to -60' else 'unknown' end as Lat_Group from tb_6")createOrReplaceTempView("tb_8")
+    spark.sql("select Lat_Group, sum(confirmed) as Confirmed, sum(deaths) as Deaths from tb_8 group by Lat_Group order by deaths ASC").show()
+    //when (Lat > 60 and when Lat <= 90) then '60 to 90' when (Lat < 0 and Lat >= -30) then '-30 to 0' when (Lat < -30 and Lat >= -60) then '-60 to -30' when (Lat < -60 and Lat >= -90) then '-90 to -60'
     //spark.sql("create table tb1 as SELECT tb_covid_19_data.`Province/State`,tb_covid_19_data.`Country/Region`,tb_confirmed.Lat,`Confirmed`,`Deaths`,`Recovered` from tb_covid_19_data right join tb_confirmed on tb_covid_19_data.`Country/Region` = tb_confirmed.`Country/Region` or tb_covid_19_data.`Country/Region` = 'Mainland ' + tb_confirmed.`Country/Region` order by Lat ASC").show()
    // spark.sql("update tb1 set `Counrty/Region` = Replace(`Country/Region`,'China','Mainland China')")
     //spark.sql("create table tb2 as SELECT REPLACE('tb1','Mainland China','China'")
