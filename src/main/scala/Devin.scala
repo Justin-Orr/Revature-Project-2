@@ -1,5 +1,5 @@
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions.{callUDF, lit, min}
+import org.apache.spark.sql.functions.{asc, callUDF, desc, lit, min}
 
 import java.sql.Date
 import java.text.SimpleDateFormat
@@ -30,12 +30,17 @@ object Devin {
       .createOrReplaceTempView("covid_19_data")
 
     // query the covid_19_data table for rate, rank by rate. join with the other table to get first confirmed case
-    spark.sql("SELECT `Country/Region`, row_number() OVER (ORDER BY SUM(deaths)/sum(Confirmed) DESC) as rank, ROUND(sum(deaths)/sum(Confirmed)*100,3) as fatality_rate, sum(Confirmed) as confirmed_cases" +
-      " FROM covid_19_data GROUP BY `Country/Region` ORDER BY rank ASC")
-      .join(first_confirmed_cases, Seq( "Country/Region"), "inner")
+    val data = spark.sql("SELECT `Country/Region`, " +
+      "row_number() OVER (ORDER BY SUM(deaths)/sum(Confirmed) DESC) as rank, " +
+      "ROUND(sum(deaths)/sum(Confirmed)*100,3) as fatality_rate, " +
+      "sum(Confirmed) as confirmed_cases " +
+      "FROM covid_19_data GROUP BY `Country/Region`")
+      .join(first_confirmed_cases, Seq( "Country/Region"), "left_outer")
       .orderBy("rank")
       .withColumnRenamed("min(First_Confirmed_Case)", "First_Confirmed_Case")
       .show
+
+
   }
 
 
