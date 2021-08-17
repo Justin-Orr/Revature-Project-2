@@ -3,59 +3,30 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{broadcast, col, lit, monotonically_increasing_id, row_number}
 import org.joda.time.{DateTime, DateTimeZone}
-
-import Array._
-
+import org.apache.spark.sql.functions._
 
 object Justin {
 
-  var c19_df:DataFrame = null
   var confirmed_df:DataFrame = null
-  var confirmed_US_df:DataFrame = null
-  var deaths_df:DataFrame = null
-  var deaths_US_df:DataFrame = null
-  var recovered_df:DataFrame = null
 
   /* Main function to be used */
 
   def findings(spark:SparkSession):Unit = {
+    var start = getTime()
+
     create_data_frames()
     getTotalConfirmationsBySeason(spark)
+
+    var end = getTime()
+    var diff = end - start
+    println("Time Elapsed: " + f"$diff%1.3f" + " seconds")
   }
-
-  /* General Helper Functions */
-
-  def import_data(fileName: String):DataFrame = {
-    return spark.read.format("csv")
-      .option("sep", ",")
-      .option("inferSchema", "true")
-      .option("header", "true")
-      .load("input/" + fileName)
-  }
-
-  def create_data_frames(): Unit = {
-    //c19_df = import_data("covid_19_data.csv")
-
-    confirmed_df = import_data("time_series_covid_19_confirmed.csv")
-    confirmed_df = add_row_numbers(confirmed_df)
-
-    //confirmed_US_df = import_data("time_series_covid_19_confirmed_US.csv")
-    //deaths_df = import_data("time_series_covid_19_deaths.csv")
-    //deaths_US_df = import_data("time_series_covid_19_deaths_US.csv")
-    //recovered_df = import_data("time_series_covid_19_recovered.csv")
-  }
-
-  def add_row_numbers(df:DataFrame): DataFrame = {
-    val windSpec = Window.partitionBy(lit(0))
-      .orderBy(monotonically_increasing_id())
-    return df.withColumn("row_num", row_number().over(windSpec))
-  }
-
 
   /* Use case Functions */
 
 
   def getTotalConfirmationsBySeason(spark:SparkSession): Unit = {
+
     //Create data frames based on all columns within a range based of the column headers of the table
 
     val winter_sum_df = get_seasonal_confirmations(spark,4,42,"winter_19_20")
@@ -65,23 +36,45 @@ object Justin {
     val winter_sum_df2 = get_seasonal_confirmations(spark,318,407,"winter_20_21")
     val spring_sum_df2 = get_seasonal_confirmations(spark,408,470,"spring_21")
 
-    var colNum = Seq(0,1,2,3,471) //inclusive
+    var colNum = Seq(1,471) //inclusive (country/region column and row number column)
     val confirmed_short_df = confirmed_df.select(colNum map confirmed_df.columns map col: _*)
 
-
-    var start = getTime()
     val df1 = winter_sum_df2.join(broadcast(spring_sum_df2), Seq("row_num"), "inner")
     val df2 = fall_sum_df.join(broadcast(df1), Seq("row_num"), "inner")
     val df3 = summer_sum_df.join(broadcast(df2), Seq("row_num"), "inner")
     val df4 = spring_sum_df.join(broadcast(df3), Seq("row_num"), "inner")
     val df5 = winter_sum_df.join(broadcast(df4), Seq("row_num"), "inner")
     val confirmed_cases_by_season_df = confirmed_short_df.join(broadcast(df5), Seq("row_num"), "inner")
-    confirmed_cases_by_season_df.show(10)
 
-    var end = getTime()
-    var diff = end - start
-    println("Time Elapsed: " + f"$diff%1.3f" + " seconds")
+    confirmed_cases_by_season_df.createOrReplaceTempView("seasonal_confirmed_view")
 
+    val seasonal_confirmed = spark.sql("SELECT `Country/Region`, " +
+      "sum(winter_19_20_total_confirmed) as winter_19_20_total_confirmed, " +
+      "sum(spring_20_total_confirmed) as spring_20_total_confirmed, " +
+      "sum(summer_20_total_confirmed) as summer_20_total_confirmed, " +
+      "sum(fall_20_total_confirmed) as fall_20_total_confirmed, " +
+      "sum(winter_20_21_total_confirmed) as winter_20_21_total_confirmed, " +
+      "sum(spring_21_total_confirmed) as spring_21_total_confirmed " +
+      "FROM seasonal_confirmed_view " +
+      "GROUP BY `Country/Region` " +
+      "ORDER BY `Country/Region` ASC")
+
+    seasonal_confirmed.createOrReplaceTempView("seasonal_confirmed")
+
+    println("Top 10 Countries w/ the Most Covid Confirmations by Season")
+    print_top_10_confirmed("winter_19_20_total_confirmed")
+    print_top_10_confirmed("spring_20_total_confirmed")
+    print_top_10_confirmed("summer_20_total_confirmed")
+    print_top_10_confirmed("fall_20_total_confirmed")
+    print_top_10_confirmed("winter_20_21_total_confirmed")
+    print_top_10_confirmed("spring_21_total_confirmed")
+
+
+  }
+
+  def print_top_10_confirmed(col:String): Unit = {
+    spark.sql("SELECT `Country/Region`, " + col + " " +
+      "FROM seasonal_confirmed ORDER BY " + col + " DESC").show(10)
   }
 
   /**
@@ -108,6 +101,27 @@ object Justin {
     var df = sc.parallelize(confirmed_season_array_row).toDF(season + "_total_confirmed")
     df = add_row_numbers(df)
     return df
+  }
+
+  /* General Helper Functions */
+
+  def import_data(fileName: String):DataFrame = {
+    return spark.read.format("csv")
+      .option("sep", ",")
+      .option("inferSchema", "true")
+      .option("header", "true")
+      .load("input/" + fileName)
+  }
+
+  def create_data_frames(): Unit = {
+    confirmed_df = import_data("time_series_covid_19_confirmed.csv")
+    confirmed_df = add_row_numbers(confirmed_df)
+  }
+
+  def add_row_numbers(df:DataFrame): DataFrame = {
+    val windSpec = Window.partitionBy(lit(0))
+      .orderBy(monotonically_increasing_id())
+    return df.withColumn("row_num", row_number().over(windSpec))
   }
 
   def getTime(): Double = {

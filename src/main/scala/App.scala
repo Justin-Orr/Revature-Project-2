@@ -17,18 +17,8 @@ object App {
     println("-- Created Spark Session --")
     spark.sparkContext.setLogLevel("ERROR")
     //spark_test()
-    //test(spark)
     Justin.findings(spark)
 
-  }
-
-  def testToDF(spark:SparkSession): Unit = {
-    //The toDF function only works after you create the spark session and use the following import statement.
-    //The import also has to be in a different method from either main or the function that initializes the spark session
-    import spark.implicits._
-    val rdd1 = sc.parallelize(Seq(1,2))
-    val df = rdd1.toDF()
-    df.show()
   }
 
   def spark_session_init(): SparkSession = {
