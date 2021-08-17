@@ -17,7 +17,6 @@ object App {
     spark.sparkContext.setLogLevel("ERROR")
     spark_test()
 
-
     Devin.showMortalityRates
   }
 
