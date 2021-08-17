@@ -15,12 +15,10 @@ object Devin {
   def showMortalityRates(): Unit = {
 
     // combine international and US time series tables and get the first confirmed case for each country/region
-    val first_confirmed_cases = USFirstConfirmedDataFrame()
+    val first_confirmed_cases = spark.sparkContext.broadcast(USFirstConfirmedDataFrame()
       .union(internationalFirstConfirmedDataFrame())
       .groupBy( $"Country/Region")
-      .agg(min($"First_Confirmed_Case"))
-
-    first_confirmed_cases.createOrReplaceTempView("first_confirmed_cases")
+      .agg(min($"First_Confirmed_Case")))
 
 
     // read the csv with overall totals of deaths and confirmed cases and create a spark.sql view to query
@@ -35,7 +33,7 @@ object Devin {
       "ROUND(sum(deaths)/sum(Confirmed)*100,3) as fatality_rate, " +
       "sum(Confirmed) as confirmed_cases " +
       "FROM covid_19_data GROUP BY `Country/Region`")
-      .join(first_confirmed_cases, Seq( "Country/Region"), "left_outer")
+      .join(first_confirmed_cases.value, Seq( "Country/Region"), "left_outer")
       .orderBy("rank")
       .withColumnRenamed("min(First_Confirmed_Case)", "First_Confirmed_Case")
       .show

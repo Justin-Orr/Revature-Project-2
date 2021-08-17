@@ -19,7 +19,6 @@ object App {
 
 
     Devin.showMortalityRates
-
   }
 
   def spark_session_init(): SparkSession = {
