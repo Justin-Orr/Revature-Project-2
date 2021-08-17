@@ -1,7 +1,9 @@
 import App.{sc, spark}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.{col, lit, monotonically_increasing_id, row_number}
+import org.apache.spark.sql.functions.{broadcast, col, lit, monotonically_increasing_id, row_number}
+import org.joda.time.{DateTime, DateTimeZone}
+
 import Array._
 
 
@@ -66,55 +68,19 @@ object Justin {
     var colNum = Seq(0,1,2,3,471) //inclusive
     val confirmed_short_df = confirmed_df.select(colNum map confirmed_df.columns map col: _*)
 
-    confirmed_short_df.join(winter_sum_df, Seq("row_num"), "inner").show(10)
 
-//    confirmed_short_df.createOrReplaceTempView("confirmed_short_df")
-//    winter_sum_df.createOrReplaceTempView("winter_sum_df")
-//    spring_sum_df.createOrReplaceTempView("spring_sum_df")
-//    summer_sum_df.createOrReplaceTempView("summer_sum_df")
-//    fall_sum_df.createOrReplaceTempView("fall_sum_df")
-//    winter_sum_df2.createOrReplaceTempView("winter_sum_df2")
-//    spring_sum_df2.createOrReplaceTempView("spring_sum_df2")
-//
-//    //Increase performance using broadcast variables
-//
-//
-//    val q1 = "SELECT w.row_num, winter_19_20_total_confirmed, spring_20_total_confirmed FROM " +
-//          "winter_sum_df w INNER JOIN spring_sum_df s " +
-//          "ON w.row_num = s.row_num " +
-//          "ORDER BY row_num"
-//
-//    val q2 = "SELECT s.row_num, summer_20_total_confirmed, fall_20_total_confirmed FROM " +
-//          "summer_sum_df s INNER JOIN fall_sum_df f " +
-//          "ON s.row_num = f.row_num " +
-//          "ORDER BY row_num"
-//
-//    val q3 = "SELECT w.row_num, winter_20_21_total_confirmed, spring_21_total_confirmed FROM " +
-//          "winter_sum_df2 w INNER JOIN spring_sum_df2 s " +
-//          "ON w.row_num = s.row_num " +
-//          "ORDER BY row_num"
-//
-//    val q4 = "SELECT t1.row_num, winter_19_20_total_confirmed, spring_20_total_confirmed, summer_20_total_confirmed, fall_20_total_confirmed " +
-//      "FROM ("+ q1 + ") t1 INNER JOIN (" + q2 + ") t2 " +
-//      "ON t1.row_num = t2.row_num " +
-//      "ORDER BY row_num"
-//
-//    val q5 = "SELECT t3.row_num, winter_19_20_total_confirmed, spring_20_total_confirmed, summer_20_total_confirmed, fall_20_total_confirmed, winter_20_21_total_confirmed, spring_21_total_confirmed " +
-//      "FROM ("+ q3 + ") t3 INNER JOIN (" + q4 + ") t4 " +
-//      "ON t3.row_num = t4.row_num " +
-//      "ORDER BY row_num"
-//
-//    spark.sql("SELECT c.row_num, `Province/State`, `Country/Region`, Lat, Long, " +
-//      "winter_19_20_total_confirmed, " +
-//      "spring_20_total_confirmed, " +
-//      "summer_20_total_confirmed, " +
-//      "fall_20_total_confirmed, " +
-//      "winter_20_21_total_confirmed, " +
-//      "spring_21_total_confirmed " +
-//      "FROM confirmed_short_df c " +
-//      "INNER JOIN (" + q5 + ") t5 " +
-//      "ON c.row_num = t5.row_num " +
-//      "ORDER BY row_num").show()
+    var start = getTime()
+    val df1 = winter_sum_df2.join(broadcast(spring_sum_df2), Seq("row_num"), "inner")
+    val df2 = fall_sum_df.join(broadcast(df1), Seq("row_num"), "inner")
+    val df3 = summer_sum_df.join(broadcast(df2), Seq("row_num"), "inner")
+    val df4 = spring_sum_df.join(broadcast(df3), Seq("row_num"), "inner")
+    val df5 = winter_sum_df.join(broadcast(df4), Seq("row_num"), "inner")
+    val confirmed_cases_by_season_df = confirmed_short_df.join(broadcast(df5), Seq("row_num"), "inner")
+    confirmed_cases_by_season_df.show(10)
+
+    var end = getTime()
+    var diff = end - start
+    println("Time Elapsed: " + f"$diff%1.3f" + " seconds")
 
   }
 
@@ -142,6 +108,10 @@ object Justin {
     var df = sc.parallelize(confirmed_season_array_row).toDF(season + "_total_confirmed")
     df = add_row_numbers(df)
     return df
+  }
+
+  def getTime(): Double = {
+    return DateTime.now(DateTimeZone.UTC).getMillis() / 1000.0
   }
 
 }

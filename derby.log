@@ -1,11 +1,11 @@
 ----------------------------------------------------------------
-Thu Aug 12 15:44:47 CDT 2021:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-017b-3c1c-37d0-00000891e890 
-on database directory C:\Users\Justin\IdeaProjects\Revature-Project-2\metastore_db with class loader org.apache.spark.sql.hive.client.IsolatedClientLoader$$anon$1@227a47 
-Loaded from file:/C:/Users/Justin/AppData/Local/Coursier/cache/v1/https/repo1.maven.org/maven2/org/apache/derby/derby/10.12.1.1/derby-10.12.1.1.jar
-java.vendor=Temurin
-java.runtime.version=1.8.0_302-b08
-user.dir=C:\Users\Justin\IdeaProjects\Revature-Project-2
+Tue Aug 17 11:13:57 CDT 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-017b-54e4-0d66-0000152cd9c0 
+on database directory C:\Users\jjore\IdeaProjects\Revature-Project-2\metastore_db with class loader org.apache.spark.sql.hive.client.IsolatedClientLoader$$anon$1@75ae4a1f 
+Loaded from file:/C:/Users/jjore/AppData/Local/Coursier/cache/v1/https/repo1.maven.org/maven2/org/apache/derby/derby/10.12.1.1/derby-10.12.1.1.jar
+java.vendor=AdoptOpenJDK
+java.runtime.version=1.8.0_292-b10
+user.dir=C:\Users\jjore\IdeaProjects\Revature-Project-2
 os.name=Windows 10
 os.arch=amd64
 os.version=10.0
