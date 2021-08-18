@@ -17,7 +17,8 @@ object Devin {
     val first_confirmed_cases = spark.sparkContext.broadcast(USFirstConfirmedDataFrame()
       .union(internationalFirstConfirmedDataFrame())
       .groupBy( $"Country/Region")
-      .agg(min($"First_Confirmed_Case")))
+      .agg(min($"First_Confirmed_Case"))
+    )
 
 
     // read the csv with overall totals of deaths and confirmed cases and create a spark.sql view to query
@@ -35,10 +36,9 @@ object Devin {
       .join(first_confirmed_cases.value, Seq( "Country/Region"), "left_outer")
       .orderBy("rank")
       .withColumnRenamed("min(First_Confirmed_Case)", "First_Confirmed_Case")
-      .cache()
   }
   def showMortalityRates(): Unit = {
-    getMortalityRates.show()
+    getMortalityRates.show(100)
   }
 
 

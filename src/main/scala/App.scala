@@ -1,6 +1,7 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.dsl.expressions.StringToAttributeConversionHelper
 import org.apache.spark.sql.functions.{avg, col}
+import org.joda.time.{DateTime, DateTimeZone}
 
 
 object App {
@@ -17,7 +18,9 @@ object App {
     spark.sparkContext.setLogLevel("ERROR")
     spark_test()
 
+    var start = DateTime.now(DateTimeZone.UTC).getMillis() / 1000.0
     Devin.showMortalityRates
+    println("Time elapsed: " + ((DateTime.now(DateTimeZone.UTC).getMillis() / 1000.0) - start).toString)
   }
 
   def spark_session_init(): SparkSession = {
