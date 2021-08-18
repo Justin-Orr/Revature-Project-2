@@ -4,6 +4,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{broadcast, col, lit, monotonically_increasing_id, row_number}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.apache.spark.sql.functions._
+import org.apache.spark.storage.StorageLevel._
 
 object Justin {
 
@@ -59,6 +60,8 @@ object Justin {
       "GROUP BY `Country/Region` " +
       "ORDER BY `Country/Region` ASC")
 
+    seasonal_confirmed.persist(MEMORY_ONLY) // To optimize our queries
+
     seasonal_confirmed.createOrReplaceTempView("seasonal_confirmed")
 
     println("Top 10 Countries w/ the Most Covid Confirmations by Season")
@@ -74,7 +77,7 @@ object Justin {
 
   def print_top_10_confirmed(col:String): Unit = {
     spark.sql("SELECT `Country/Region`, " + col + " " +
-      "FROM seasonal_confirmed ORDER BY " + col + " DESC").show(10)
+      "FROM seasonal_confirmed ORDER BY " + col + " DESC LIMIT 10").show()
   }
 
   /**
