@@ -1,6 +1,6 @@
 
 import org.apache.spark.sql.SparkSession
-import App.spark
+import App.{spark}
 
 object Mark {
 
@@ -26,11 +26,13 @@ object Mark {
   spark.sql("select `Country/Region`,sum(Confirmed) as Confirmed,sum(Deaths) as Deaths from tb_covid_19_data group by `Country/Region`")createOrReplaceTempView("tb_5")
   spark.sql("select * from tb_5")
   spark.sql("SELECT tb_5.`Country/Region`,tb_confirmed.Lat,`Confirmed`,`Deaths` from tb_5 right join tb_confirmed on tb_5.`Country/Region` = tb_confirmed.`Country/Region` order by Lat asc")createOrReplaceTempView("tb_6")
-  spark.sql("select `Country/Region`, lat, confirmed, deaths, case when (Lat >= 0 and Lat <= 30) then ' 0  to  30' when (Lat > 30 and Lat <= 60) then ' 30  to  60' when (Lat > 60 and Lat <= 90) then ' 60  to  90' when (Lat < 0 and Lat >= -30) then '-30  to   0' when (Lat < -30 and Lat >= -60) then '-60  to -30' when (Lat < -60 and Lat >= -90) then '-90  to -60' when (`Country/Region` = 'China') then ' 30  to  60' when (`Country/Region` = 'Canada') then ' 30  to  60' else 'unknown' end as Lat_Group from tb_6")createOrReplaceTempView("tb_8")
+  spark.sql("select `Country/Region`, lat, confirmed, deaths, 'recovered', case when (Lat >= 0 and Lat <= 30) then ' 0  to  30' when (Lat > 30 and Lat <= 60) then ' 30  to  60' when (Lat > 60 and Lat <= 90) then ' 60  to  90' when (Lat < 0 and Lat >= -30) then '-30  to   0' when (Lat < -30 and Lat >= -60) then '-60  to -30' when (Lat < -60 and Lat >= -90) then '-90  to -60' when (`Country/Region` = 'China') then ' 30  to  60' when (`Country/Region` = 'Canada') then ' 30  to  60' else 'unknown' end as Lat_Group from tb_6")createOrReplaceTempView("tb_8")
   spark.sql("select Lat_Group, round(sum(confirmed)/1000000,2) as Confirmed_Millions, round(sum(deaths)/1000000,2) as Deaths_Millions, concat(cast(round(sum(deaths)/sum(confirmed)*100, 3) as string), ' %')  as Death_Rate from tb_8 group by Lat_Group order by Lat_Group ASC")
 
   // CONVERT TABLE QUERY TO DATAFRAME
-    val df_lat = spark.sql("select Lat_Group, round(sum(confirmed)/1000000,2) as Confirmed_Millions, round(sum(deaths)/1000000,2) as Deaths_Millions, concat(cast(round(sum(deaths)/sum(confirmed)*100, 3) as string), ' %')  as Death_Rate from tb_8 group by Lat_Group order by Lat_Group ASC")
+   //val df_lat = spark.sql("select Lat_Group, round(sum(confirmed)/1000000,2) as Confirmed_Millions, round(sum(deaths)/1000000,2) as Deaths_Millions, concat(cast(round(sum(deaths)/sum(confirmed)*100, 3) as string), ' %')  as Death_Rate from tb_8 group by Lat_Group order by Lat_Group ASC")
+    val df_lat = spark.sql("select Lat_Group, concat(cast(round(sum(deaths)/sum(confirmed)*100, 3) as string), ' %')  as Death_Rate from tb_8 group by Lat_Group order by Lat_Group ASC")
+
     println("Covid Death Rates By Latitude: ")
     println("(Data From 1/22/2020 to 5/2/2021)")
     df_lat.show()
