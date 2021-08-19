@@ -21,9 +21,9 @@ object App {
     spark.sparkContext.setLogLevel("ERROR")
     //spark_test()
 
-    Justin.findings(spark)
-    Mark.show_tables(spark)
-    Devin.showMortalityRates()
+//    Justin.findings(spark)
+//    Mark.show_tables(spark)
+//    Devin.showMortalityRates()
     TimeSeriePlot.main(args)
   }
 

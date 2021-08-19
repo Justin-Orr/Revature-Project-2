@@ -47,7 +47,7 @@ object TimeSeriePlot extends JFXApp {
   val spark: SparkSession = App.spark
 
 //  println("Loading Data...")
-//  LoadData.apply(spark)
+  LoadData.apply(spark)
 
   //get the country/region to plot data
   val country: String = getCountry(spark)
