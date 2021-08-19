@@ -18,9 +18,7 @@ object App {
     spark.sparkContext.setLogLevel("ERROR")
     spark_test()
 
-    var start = DateTime.now(DateTimeZone.UTC).getMillis() / 1000.0
-    Devin.showMortalityRates
-    println("Time elapsed: " + ((DateTime.now(DateTimeZone.UTC).getMillis() / 1000.0) - start).toString)
+    Devin.showMortalityRates()
   }
 
   def spark_session_init(): SparkSession = {
