@@ -10,11 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
 object App {
   var spark:SparkSession = null
-  //import spark.implicits._
   var sc:SparkContext = null
-  //var sc = spark.sparkContext;
-  //import spark.implicits._
-
 
   def main(args: Array[String]) : Unit = {
     // create a spark session
@@ -26,7 +22,6 @@ object App {
     println("-- Created Spark Session --")
 
     spark.sparkContext.setLogLevel("ERROR")
-    //spark_test()
     Mark.show_tables(spark)
 
 

@@ -37,7 +37,8 @@ object Mark {
 
   // CONVERT TO RDD
     val rdd_lat = df_lat.rdd
-    rdd_lat.collect()
+    rdd_lat.cache()
+    //rdd_lat.collect().foreach(println)
 
   // CONVERT TO DATASET
     //case class data(Lat_Group: String, Confirmed_Millions: Double, Deaths_Millions: Double, Death_Rate: String)
@@ -45,4 +46,5 @@ object Mark {
     //import org.apache.spark.sql.{Encoder, Encoders}
     //val ds_lat = df_lat.as[data]
 }
+
 }
