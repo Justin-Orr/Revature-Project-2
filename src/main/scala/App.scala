@@ -1,3 +1,4 @@
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.dsl.expressions.StringToAttributeConversionHelper
 import org.apache.spark.sql.functions.{avg, col}
@@ -7,6 +8,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 object App {
 
   var spark:SparkSession = null
+  var sc:SparkContext = null
 
   def main(args: Array[String]): Unit = {
     // create a spark session
@@ -14,10 +16,13 @@ object App {
     System.setProperty("hadoop.home.dir", "C:\\winutils")
 
     spark = spark_session_init()
+    sc = spark.sparkContext
     println("-- Created Spark Session --")
     spark.sparkContext.setLogLevel("ERROR")
-    spark_test()
+    //spark_test()
 
+    Justin.findings(spark)
+    Mark.show_tables(spark)
     Devin.showMortalityRates()
   }
 
