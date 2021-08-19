@@ -1,1 +1,6 @@
-metastore_db/
+metastore_db
+.idea/
+.bsp/
+project/
+derby.log
+target/
