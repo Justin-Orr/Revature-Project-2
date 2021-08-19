@@ -1,6 +1,6 @@
 
-import org.apache.spark.sql.{DataFrame,Dataset,Row,SparkSession}
-import App.{sc, spark}
+import org.apache.spark.sql.SparkSession
+import App.spark
 
 object Mark {
 
