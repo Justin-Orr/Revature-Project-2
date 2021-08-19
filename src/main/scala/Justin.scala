@@ -3,7 +3,6 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{broadcast, col, lit, monotonically_increasing_id, row_number}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.apache.spark.sql.functions._
 import org.apache.spark.storage.StorageLevel._
 
 object Justin {
