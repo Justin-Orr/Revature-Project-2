@@ -35,37 +35,6 @@ object CountryPeaks {
     }
   }
 
-  def countryWeeklyBroadCastCached(name:String, spark:SparkSession): DataFrame = {
-    try {
-      val weeklyTotal = spark.sql(s"Select * from covid_19 where Country_Region = '$name' " +
-        s"and date_format(ObservationDate, 'u') = 6 order by ObservationDate")
-        .toDF("Country_Region", "Date", "Confirmed", "Deaths", "Recovered")
-
-      weeklyTotal.cache()
-      val broadcastWeekly = broadcast(weeklyTotal
-        .withColumn("prevWeek", date_add(col("Date"), 7))
-        .select(col("prevWeek"),
-          col("Confirmed").as("prev_Confirmed"),
-          col("Deaths").as("prev_Deaths"),
-          col("Recovered").as("prev_Recovered")))
-
-      spark.conf.set("spark.sql.crossJoin.enabled", "true")
-      val joinedWeekly = weeklyTotal.join(broadcastWeekly,
-        weeklyTotal("Date") === broadcastWeekly("prevWeek"), "left")
-
-      def diff = udf((num: Long, prev_num: Long) => num - prev_num)
-
-      joinedWeekly
-        .withColumn("new_cases", when(col("prev_Confirmed").isNull, col("Confirmed")).otherwise(diff(col("Confirmed"), col("prev_Confirmed"))))
-        .withColumn("new_deaths", when(col("prev_deaths").isNull, col("Deaths")).otherwise(diff(col("Deaths"), col("prev_Deaths"))))
-        .withColumn("new_recovered", when(col("prev_Recovered").isNull, col("Recovered")).otherwise(diff(col("Recovered"), col("prev_recovered"))))
-        .select("Date", "new_cases", "new_deaths", "new_recovered")
-    }
-    catch {
-      case ex: ParseException => null
-    }
-  }
-
   def countryWeeklyWindow(name:String, spark:SparkSession): DataFrame = {
     try {
       val windowSpec = Window.orderBy("Date")
@@ -163,20 +132,18 @@ object CountryPeaks {
       .getOrCreate()
 
     spark.sql("Use project2")
-    spark.sql("cache table covid_19")
     val countries: Array[Row] = spark.sql("Select distinct Country_Region from covid_19").collect()
+
 
     val t1 = testMethod(countryWeekly, countries, spark)
     val t2 = testMethod(countryWeeklyBroadCast, countries, spark)
-//    val t6 = testMethod(countryWeeklyBroadCastCached, countries, spark)
     val t3 = testMethod(countryWeeklyWindow, countries, spark)
     val t4 = testMethod(countryWeeklySQLWindow, countries, spark)
 
-    println("Self join without broadcasting variable:\n" + t1)
-    println("Self join with broadcasting variable:\n" + t2)
-//    println("Self join with broadcasting variable and cached dataframe:\n" + t6)
-    println("Dataframe window function:\n" + t3)
-    println("SQL window function:\n" + t4)
+    println("Self join without broadcasting variable: " + t1)
+    println("Self join with broadcasting variable: " + t2)
+    println("Dataframe window function: " + t3)
+    println("SQL window function: " + t4)
 
 
   }

@@ -44,7 +44,12 @@ object TimeSeriePlot extends JFXApp {
     lineChart
   }
 
-  val spark: SparkSession = App.spark
+  val spark: SparkSession = SparkSession
+    .builder()
+    .appName("hello hive")
+    .config("spark.master", "local[*]")
+    .enableHiveSupport()
+    .getOrCreate()
 
   spark.sql("Create database if not exists project2")
   spark.sql("Use project2")
@@ -69,16 +74,14 @@ object TimeSeriePlot extends JFXApp {
   val deathChart: LineChart[String, Number] = getLineChart(df, "Date", "new_deaths")
   val deathRatioChart: LineChart[String, Number] = getLineChart(ratioDF, "Date", "death_rate")
 
-
-    stage = new PrimaryStage {
-
-      title = country
-      scene = new Scene(420, 750) {
-        val pane = new FlowPane
-        pane.children += confChart
-        pane.children += deathChart
-        pane.children += deathRatioChart
-        root = pane
-      }
+  stage = new PrimaryStage {
+    title = country
+    scene = new Scene(420, 750) {
+      val pane = new FlowPane
+      pane.children += confChart
+      pane.children += deathChart
+      pane.children += deathRatioChart
+      root = pane
     }
+  }
 }
