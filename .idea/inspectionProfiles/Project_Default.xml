@@ -74,6 +74,10 @@
     <inspection_tool class="MapValues" enabled="true" level="ERROR" enabled_by_default="true" />
     <inspection_tool class="MarkInnerCaseObjectsAsFinal" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="MatchToPartialFunction" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="MavenDuplicateDependenciesInspection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="MavenDuplicatePluginInspection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="MavenPropertyInParent" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="MavenRedundantGroupId" enabled="true" level="ERROR" enabled_by_default="true" />
     <inspection_tool class="MultipleArgListsInAnnotation" enabled="true" level="ERROR" enabled_by_default="true" />
     <inspection_tool class="MutatorLikeMethodIsParameterless" enabled="true" level="ERROR" enabled_by_default="true" />
     <inspection_tool class="NameBooleanParameters" enabled="true" level="ERROR" enabled_by_default="true" />

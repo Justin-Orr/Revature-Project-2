@@ -1,4 +1,3 @@
-
 name := "Revature-Project-2"
 
 version := "0.1"
@@ -11,3 +10,6 @@ libraryDependencies += "org.apache.spark" %% "spark-core" % "2.3.1"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.1"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-hive
 libraryDependencies += "org.apache.spark" %% "spark-hive" % "2.3.1"
+
+libraryDependencies += "org.scalafx" %% "scalafx" % "15.0.1-R21"
+

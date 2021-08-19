@@ -14,7 +14,7 @@ object TestTable {
       .getOrCreate()
 
     spark.sql("Use project2")
-    spark.sql("Select * from Covid_19 where date_format(ObservationDate, 'u') = 6 Order by `Country/Region`, ObservationDate").show
+    print(spark.sql("Select distinct country_region from Covid_19 where country_region = 'US'").collectAsList().isEmpty)
 
   }
 }
