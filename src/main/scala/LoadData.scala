@@ -28,7 +28,7 @@ object LoadData {
       .withColumnRenamed("sum(Deaths)", "Deaths")
       .withColumnRenamed("sum(Recovered)", "Recovered")
       .repartition(col("Country_Region"))
+    println("Data loaded. Generating table ...")
     newDF.write.mode("overwrite").saveAsTable("Covid_19")
-
   }
 }
