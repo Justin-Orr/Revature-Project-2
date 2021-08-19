@@ -13,7 +13,7 @@ object App {
   def main(args: Array[String]): Unit = {
     // create a spark session
     // for Windows
-    System.setProperty("hadoop.home.dir", "C:\\winutils")
+    //System.setProperty("hadoop.home.dir", "C:\\winutils")
 
     spark = spark_session_init()
     sc = spark.sparkContext
@@ -24,6 +24,7 @@ object App {
     Justin.findings(spark)
     Mark.show_tables(spark)
     Devin.showMortalityRates()
+    TimeSeriePlot.main(args)
   }
 
   def spark_session_init(): SparkSession = {
@@ -40,6 +41,5 @@ object App {
     spark.sql("LOAD DATA LOCAL INPATH 'input/test.txt' INTO TABLE newone")
     spark.sql("SELECT * FROM newone").show()
     spark.sql("DROP table newone")
-
   }
 }
