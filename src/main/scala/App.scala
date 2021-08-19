@@ -24,6 +24,7 @@ object App {
     Justin.findings(spark)
     Mark.show_tables(spark)
     Devin.showMortalityRates()
+
   }
 
   def spark_session_init(): SparkSession = {
